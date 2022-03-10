@@ -1,16 +1,15 @@
-"""Packaging config for Hypothesmith."""
+#!/usr/bin/env python3
 
-import os
+from pathlib import Path
 
 import setuptools
 
 
-def local_file(*name: str) -> str:
-    """Interpret filename as relative to this file."""
-    return os.path.relpath(os.path.join(os.path.dirname(__file__), *name))
+def local_file(name: str) -> Path:
+    return Path(__file__).parent / name
 
 
-with open(local_file("flake8_async.py")) as o:
+with local_file("flake8_async.py").open("r") as o:
     for line in o:
         if line.startswith("__version__"):
             _, __version__, _ = line.split('"')
@@ -40,7 +39,11 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
-    long_description=open(local_file("README.md")).read(),
+    long_description=(
+        local_file("README.md").open().read()
+        + "\n\n"
+        + local_file("CHANGELOG.md").open().read()
+    ),
     long_description_content_type="text/markdown",
     entry_points={
         "flake8.extension": ["ASYNC = flake8_async:Plugin"],
