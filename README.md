@@ -21,6 +21,12 @@ coroutine
 
 ## Development
 
+When you wish to add a check to `flake8-async` please ensure the following:
+
+- This `README.md` gets a one line about your new warning
+- CHANGELOG gets added to a `## UNRELEASED` section
+- Unittests are added showing the check hilight where it should and shouldn't
+
 To run our test suite please use tox.
 
 ```console

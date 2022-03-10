@@ -16,17 +16,26 @@ class Version(NamedTuple):
         return cls(*map(int, string.split(".")))
 
 
+UNRELEASED_VERSION = Version(0, 0, 0)
+
+
 def get_latest_release() -> Optional[Version]:
-    pattern = re.compile(r"^## (\d\d\.\d?\d\.\d?\d)$")
+    valid_pattern = re.compile(r"^## (\d\d\.\d?\d\.\d?\d)$")
+    unlreleased_pattern = re.compile(r"^## UNRELEASED$")
     with open(Path(__file__).parent.parent / "CHANGELOG.md") as f:
         for aline in f.readlines():
-            version_match = pattern.match(aline)
+            version_match = valid_pattern.match(aline)
             if version_match:
                 return Version.from_string(version_match.group(1))
+            unlreleased_match = unlreleased_pattern.match(aline)
+            if unlreleased_match:
+                return UNRELEASED_VERSION
+
     return None
 
 
 def test_last_release_against_changelog():
     """Ensure we have the latest version covered in CHANGELOG.md"""
     last_version = get_latest_release()
-    assert last_version == Version.from_string(flake8_async.__version__)
+    if last_version != UNRELEASED_VERSION:
+        assert last_version == Version.from_string(flake8_async.__version__)
