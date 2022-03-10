@@ -26,7 +26,10 @@ To run our test suite please use tox.
 ```console
 python3 -m venv --upgrade-deps /tmp/tfa
 /tmp/tfa/bin/pip install tox
+# Linting
 /tmp/tfa/bin/tox -e check
+# Test Running
+/tmp/tfa/bin/tox -e test -- -n auto
 ```
 
 ## License
