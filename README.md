@@ -17,6 +17,7 @@ pip install git+https://github.com/cooperlees/flake8-async
 ## List of warnings
 
 - **ASYNC100**: Warning about the use of a blocking http call inside an `async def`
+- **ASYNC101**: Warning about the use of `open`, `time.sleep` or methods in `subprocess`, inside an `async def`.
 coroutine
 
 ## Development

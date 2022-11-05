@@ -2,7 +2,7 @@ import ast
 
 import pytest
 
-from flake8_async import ASYNC100, Plugin
+from flake8_async import ASYNC100, ASYNC101, Plugin
 
 
 @pytest.mark.parametrize(
@@ -14,6 +14,27 @@ from flake8_async import ASYNC100, Plugin
         (
             "async def f():\n    httpx.get('')\n",
             {(2, 4, ASYNC100, Plugin)},
+        ),
+        ("async def f():\n    time.time()\n", set()),
+        (
+            "async def f():\n    time.sleep(0)\n",
+            {(2, 4, ASYNC101, Plugin)},
+        ),
+        (
+            "async def f():\n    subprocess.foo(0)\n",
+            set(),
+        ),
+        (
+            "async def f():\n    subprocess.run(0)\n",
+            {(2, 4, ASYNC101, Plugin)},
+        ),
+        (
+            "async def f():\n    subprocess.call(0)\n",
+            {(2, 4, ASYNC101, Plugin)},
+        ),
+        (
+            "async def f():\n    open('foo')\n",
+            {(2, 4, ASYNC101, Plugin)},
         ),
     ],
 )

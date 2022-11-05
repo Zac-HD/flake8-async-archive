@@ -6,11 +6,22 @@ from itertools import chain
 __version__ = "22.3.10"
 
 ASYNC100 = "ASYNC100: sync HTTP call in async function should use httpx.AsyncClient"
+ASYNC101 = "ASYNC101: blocking sync call in async function"
 
 
 class Visitor(ast.NodeVisitor):
-    PACKAGES = ("requests", "httpx")
-    METHODS = tuple("get options head post put patch delete request send".split())
+    HTTP_PACKAGES = ("requests", "httpx")
+    HTTP_METHODS = tuple("get options head post put patch delete request send".split())
+    SUBPROCESS_METHODS = (
+        "run",
+        "Popen",
+        # deprecated methods
+        "call",
+        "check_call",
+        "check_output",
+        "getoutput",
+        "getstatusoutput",
+    )
 
     def __init__(self) -> None:
         super().__init__()
@@ -20,12 +31,23 @@ class Visitor(ast.NodeVisitor):
         for inner in chain.from_iterable(map(ast.iter_child_nodes, node.body)):
             if (
                 isinstance(inner, ast.Call)
+                and isinstance(inner.func, ast.Name)
+                and inner.func.id == "open"
+            ):
+                self.errors.append((inner.lineno, inner.col_offset, ASYNC101))
+            elif (
+                isinstance(inner, ast.Call)
                 and isinstance(inner.func, ast.Attribute)
                 and isinstance(inner.func.value, ast.Name)
-                and inner.func.value.id in self.PACKAGES
-                and inner.func.attr in self.METHODS
             ):
-                self.errors.append((inner.lineno, inner.col_offset, ASYNC100))
+                package = inner.func.value.id
+                method = inner.func.attr
+                if package in self.HTTP_PACKAGES and method in self.HTTP_METHODS:
+                    self.errors.append((inner.lineno, inner.col_offset, ASYNC100))
+                elif ((package, method) == ("time", "sleep")) or (
+                    package == "subprocess" and method in self.SUBPROCESS_METHODS
+                ):
+                    self.errors.append((inner.lineno, inner.col_offset, ASYNC101))
         self.generic_visit(node)
 
 
