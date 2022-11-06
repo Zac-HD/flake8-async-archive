@@ -46,6 +46,6 @@ setuptools.setup(
     ),
     long_description_content_type="text/markdown",
     entry_points={
-        "flake8.extension": ["ASYNC = flake8_async:Plugin"],
+        "flake8.extension": ["ASY = flake8_async:Plugin"],
     },
 )
