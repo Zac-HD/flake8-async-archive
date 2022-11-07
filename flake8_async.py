@@ -3,10 +3,10 @@
 import ast
 from itertools import chain
 
-__version__ = "22.3.10"
+__version__ = "22.11.6"
 
 ASYNC100 = "ASYNC100: sync HTTP call in async function should use httpx.AsyncClient"
-ASYNC101 = "ASYNC101: blocking sync call in async function"
+ASYNC101 = "ASYNC101: blocking sync call in async function, use framework equivalent"
 
 
 class Visitor(ast.NodeVisitor):
