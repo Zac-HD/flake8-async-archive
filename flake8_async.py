@@ -7,6 +7,7 @@ __version__ = "22.11.6"
 
 ASYNC100 = "ASYNC100: sync HTTP call in async function should use httpx.AsyncClient"
 ASYNC101 = "ASYNC101: blocking sync call in async function, use framework equivalent"
+ASYNC102 = "ASYNC102: sync process call in async function, use framework equivalent"
 
 
 class Visitor(ast.NodeVisitor):
@@ -22,6 +23,27 @@ class Visitor(ast.NodeVisitor):
         "getoutput",
         "getstatusoutput",
     )
+    OS_PROCESS_METHODS = (
+        "popen",
+        "posix_spawn",
+        "posix_spawnp",
+        "spawnl",
+        "spawnle",
+        "spawnlp",
+        "spawnlpe",
+        "spawnv",
+        "spawnve",
+        "spawnvp",
+        "spawnvpe",
+        "system",
+    )
+    OS_WAIT_METHODS = (
+        "wait",
+        "wait3",
+        "wait4",
+        "waitid",
+        "waitpid",
+    )
 
     def __init__(self) -> None:
         super().__init__()
@@ -29,12 +51,13 @@ class Visitor(ast.NodeVisitor):
 
     def visit_AsyncFunctionDef(self, node):
         for inner in chain.from_iterable(map(ast.iter_child_nodes, node.body)):
+            error_code = None
             if (
                 isinstance(inner, ast.Call)
                 and isinstance(inner.func, ast.Name)
                 and inner.func.id == "open"
             ):
-                self.errors.append((inner.lineno, inner.col_offset, ASYNC101))
+                error_code = ASYNC101
             elif (
                 isinstance(inner, ast.Call)
                 and isinstance(inner.func, ast.Attribute)
@@ -43,11 +66,17 @@ class Visitor(ast.NodeVisitor):
                 package = inner.func.value.id
                 method = inner.func.attr
                 if package in self.HTTP_PACKAGES and method in self.HTTP_METHODS:
-                    self.errors.append((inner.lineno, inner.col_offset, ASYNC100))
-                elif ((package, method) == ("time", "sleep")) or (
-                    package == "subprocess" and method in self.SUBPROCESS_METHODS
+                    error_code = ASYNC100
+                elif (
+                    ((package, method) == ("time", "sleep"))
+                    or (package == "subprocess" and method in self.SUBPROCESS_METHODS)
+                    or (package == "os" and method in self.OS_WAIT_METHODS)
                 ):
-                    self.errors.append((inner.lineno, inner.col_offset, ASYNC101))
+                    error_code = ASYNC101
+                elif package == "os" and method in self.OS_PROCESS_METHODS:
+                    error_code = ASYNC102
+            if error_code:
+                self.errors.append((inner.lineno, inner.col_offset, error_code))
         self.generic_visit(node)
 
 

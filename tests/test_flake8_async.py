@@ -2,7 +2,7 @@ import ast
 
 import pytest
 
-from flake8_async import ASYNC100, ASYNC101, Plugin
+from flake8_async import ASYNC100, ASYNC101, ASYNC102, Plugin
 
 
 @pytest.mark.parametrize(
@@ -34,6 +34,18 @@ from flake8_async import ASYNC100, ASYNC101, Plugin
         ),
         (
             "async def f():\n    open('foo')\n",
+            {(2, 4, ASYNC101, Plugin)},
+        ),
+        (
+            "async def f():\n    os.fspath('foo')\n",
+            set(),
+        ),
+        (
+            "async def f():\n    os.popen(foo)\n",
+            {(2, 4, ASYNC102, Plugin)},
+        ),
+        (
+            "async def f():\n    os.wait(foo)\n",
             {(2, 4, ASYNC101, Plugin)},
         ),
     ],
