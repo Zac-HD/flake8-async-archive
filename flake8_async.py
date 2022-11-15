@@ -3,7 +3,7 @@
 import ast
 from itertools import chain
 
-__version__ = "22.11.6"
+__version__ = "22.11.14"
 
 ASYNC100 = "ASYNC100: sync HTTP call in async function should use httpx.AsyncClient"
 ASYNC101 = "ASYNC101: blocking sync call in async function, use framework equivalent"
