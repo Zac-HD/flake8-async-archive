@@ -1,4 +1,5 @@
 """Tests for the hypothesmith package metadata."""
+
 import re
 from pathlib import Path
 from typing import NamedTuple, Optional
