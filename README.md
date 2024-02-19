@@ -1,18 +1,18 @@
-# flake8-async
+# The former `flake8-async` plugin has been merged with `flake8-trio`
 
-A flake8 plugin that checks for bad async / asyncio practices.
+Some years ago, @Zac-HD wanted to lint for async antipatterns, and together
+with @cooperlees built out some initial checks in `flake8-async`.  However,
+it quickly became clear that many checks would need to specific to
+[Trio](https://trio.readthedocs.io/en/stable/) (or
+[anyio](https://anyio.readthedocs.io/en/stable/), or rarely asyncio),
+and so Zac went on to create [flake8-trio](https://github.com/python-trio/flake8-trio/).
 
-## Installation
+Fast-forward to early 2024, and `flake8-trio` _also_ supports anyio,
+which makes the name and error code pretty confusing.  Since it's become
+a strict superset of this plugin, we decided to merge them under the
+`flake8-async` name and add asyncio support here too - which should
+simplify both direct use, and downstream use via `ruff`.
 
-```console
-pip install flake8-async
-```
-
-- Or from GitHub
-
-```console
-pip install git+https://github.com/cooperlees/flake8-async
-```
 
 ## List of warnings
 
